@@ -1,15 +1,6 @@
-/* 모바일 앱 프레임 (Figma iPhone 17-3, 402x874) — 프레임이 절대배치(mode:none)라
-   세로 위치는 874 기준 비율(dvh)로, 가로 폭은 402 기준 비율(%)로 옮겨
-   기기 높이/폭에 동적으로 대응한다. (버튼 하단 여백은 온보딩과 동일 비율) */
-.today {
-  position: relative;
-  width: 100%;
-  max-width: 402px;
-  min-height: 100dvh;
-  margin-inline: auto;
-  background: var(--surface);
-  overflow: hidden;
-}
+/* 모바일 앱 프레임 (Figma iPhone 17-3, 402x874) — 공용 프레임은 `.screen`이 담당하고
+   여기서는 요소를 874 기준 비율(dvh)·402 기준 비율(%)로 절대 배치한다.
+   (버튼 하단 여백은 온보딩과 동일 비율) */
 
 /* 로딩/에러 — 중앙 정렬 */
 .today--center {

@@ -23,7 +23,7 @@ function Onboarding({ onComplete }: OnboardingProps) {
   }
 
   return (
-    <div className="onboarding">
+    <div className="screen onboarding">
       {/* 히어로 그래픽 — 402x874 프레임 비율로 절대 배치 */}
       {slide.heroes.map((hero, i) => (
         <img

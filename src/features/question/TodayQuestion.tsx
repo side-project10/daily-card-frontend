@@ -11,8 +11,8 @@ import cardHero from '../../assets/question/card-hero.png'
 import './TodayQuestion.css'
 
 interface TodayQuestionProps {
-  /** "답변하기" → 답변 작성(2번) 화면으로 */
-  onNext?: () => void
+  /** "답변하기" → 답변 작성(2번) 화면으로. 현재 질문 텍스트를 함께 넘긴다. */
+  onNext?: (question: string) => void
   /** 완료 모달 "카드 다시보기" 등 임의 스텝 이동 */
   onNavigate?: (step: Step) => void
 }
@@ -38,12 +38,12 @@ function TodayQuestion({ onNext, onNavigate }: TodayQuestionProps) {
   }, [dateKey, lastSeenAtMount])
 
   if (question.isPending) {
-    return <div className="today today--center">불러오는 중…</div>
+    return <div className="screen today--center">불러오는 중…</div>
   }
 
   if (question.isError) {
     return (
-      <div className="today today--center">
+      <div className="screen today--center">
         <p className="today__error">질문을 불러오지 못했어요.</p>
         <Button onClick={() => question.refetch()}>다시 시도</Button>
       </div>
@@ -55,7 +55,7 @@ function TodayQuestion({ onNext, onNavigate }: TodayQuestionProps) {
   const showCompletion = answer.data?.exists === true
 
   return (
-    <div className="today">
+    <div className="screen today">
       {isNewQuestion && (
         <Toast message="새로운 질문이 도착했어요" onDismiss={() => setToastDismissed(true)} />
       )}
@@ -72,7 +72,7 @@ function TodayQuestion({ onNext, onNavigate }: TodayQuestionProps) {
       </div>
 
       <div className="today__footer">
-        <Button onClick={onNext}>답변하기</Button>
+        <Button onClick={() => onNext?.(q.text)}>답변하기</Button>
       </div>
 
       {showCompletion && (

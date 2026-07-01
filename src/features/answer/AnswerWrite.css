@@ -1,0 +1,85 @@
+/* 화면 #2 답변 작성 — Figma iPhone 17-5 (node 4:236)
+   공용 프레임은 `.screen`이 담당. 여기서는 column auto-layout(세로 중앙, 상단 54)만. */
+.answer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 54px;
+}
+
+/* content: column gap 120 (질문+입력 블록 ↔ 버튼) */
+.answer__content {
+  display: flex;
+  flex-direction: column;
+  gap: 120px;
+}
+
+/* upper: column gap 72 (질문 ↔ 입력영역) */
+.answer__upper {
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+}
+
+/* 질문 행: padding 0 16, 가운데 정렬 */
+.answer__question-row {
+  padding: 0 16px;
+  display: flex;
+  justify-content: center;
+}
+
+/* 질문 텍스트: Pretendard Bold 700 / 20px / center / #191919 / 줄바꿈 반영 */
+.answer__question {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ink);
+  white-space: pre-line;
+}
+
+/* 입력 영역: padding 0 20, column gap 8 */
+.answer__field {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 입력 박스: 흰 배경, border 1px #B2B2B2, radius 8, height 128, padding 16 */
+.answer__input {
+  width: 100%;
+  height: 128px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  resize: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.answer__input::placeholder {
+  color: var(--line);
+}
+.answer__input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+/* 카운터 "0/40": Pretendard Regular 400 / 14px / 우측정렬 / #B0B0B0 */
+.answer__count {
+  margin: 0;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* 버튼 영역: padding 0 20 */
+.answer__footer {
+  padding: 0 20px;
+}

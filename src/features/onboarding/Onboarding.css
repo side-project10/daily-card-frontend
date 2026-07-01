@@ -1,21 +1,14 @@
-/* 모바일 앱 느낌의 풀스크린 컨테이너 (Figma 프레임 402x874)
+/* 온보딩 레이아웃 (공용 프레임은 `.screen`이 담당).
    상·하단 앵커는 874 프레임 비율에서 유도(콘텐츠 top 518, 버튼 아래 여백 111). */
 .onboarding {
   --anchor-top: 59.27dvh; /* 518 / 874 → 콘텐츠(로고) 상단, 슬라이드 간 동일 */
   --anchor-bottom: 12.7dvh; /* 111 / 874 → 버튼 하단 여백 (Figma 비율) */
 
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  max-width: 402px;
-  min-height: 100dvh;
-  margin-inline: auto;
   padding-top: var(--anchor-top);
   padding-bottom: var(--anchor-bottom);
-  background: var(--surface);
-  overflow: hidden;
 }
 
 /* 히어로 그래픽 — 노드 중심 기준 절대 배치, 텍스트 뒤에 깔린다 */

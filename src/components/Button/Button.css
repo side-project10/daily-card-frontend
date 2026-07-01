@@ -18,3 +18,13 @@
 .button--primary:active {
   opacity: 0.9;
 }
+
+/* 비활성 상태 (Figma disabled) */
+.button:disabled {
+  background: var(--disabled-bg);
+  color: var(--disabled-text);
+  cursor: default;
+}
+.button:disabled:active {
+  opacity: 1;
+}
