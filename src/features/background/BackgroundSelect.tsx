@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import CardPreview from '../../components/CardPreview/CardPreview'
 import Button from '../../components/Button/Button'
+import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { isLight } from '../../lib/color'
 import { BG_TABS, SWATCHES, TAB_KIND } from './backgrounds'
 import type { BgTab } from './backgrounds'
@@ -33,10 +34,22 @@ function BackgroundSelect({
 }: BackgroundSelectProps) {
   const [tab, setTab] = useState<BgTab>('컬러')
   const [selected, setSelected] = useState(SWATCHES[0].id)
+  // "카드 만들기" 후 저장/생성되는 동안 로딩 모달(iPhone 17-20)을 덮는다.
+  const [creating, setCreating] = useState(false)
+  const timerRef = useRef<number | undefined>(undefined)
 
   const selectedBg = SWATCHES.find((s) => s.id === selected)?.value ?? SWATCHES[0].value
   // 활성 탭에 해당하는 스와치만 노출. (그라데이션/패턴은 데이터 추가 시 자동 노출)
   const visible = SWATCHES.filter((s) => s.kind === TAB_KIND[tab])
+
+  useEffect(() => () => window.clearTimeout(timerRef.current), [])
+
+  // UI 전용: 로딩 모달을 잠깐 보여준 뒤 결과(4번)로 이동. (실제 저장 로직은 추후 연동)
+  const handleCreate = () => {
+    if (creating) return
+    setCreating(true)
+    timerRef.current = window.setTimeout(() => onCreate?.(selectedBg), 1200)
+  }
 
   return (
     <div className="screen bg">
@@ -117,11 +130,13 @@ function BackgroundSelect({
             </div>
 
             <div className="bg__cta">
-              <Button onClick={() => onCreate?.(selectedBg)}>카드 만들기</Button>
+              <Button onClick={handleCreate}>카드 만들기</Button>
             </div>
           </div>
         </div>
       </div>
+
+      {creating && <LoadingModal />}
     </div>
   )
 }

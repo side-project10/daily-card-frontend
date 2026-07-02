@@ -1,0 +1,95 @@
+/* 딤 오버레이 — 화면(.screen 프레임) 전체를 덮고 카드를 중앙 정렬.
+   Figma: #000000 30.2% */
+.loading {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.3);
+  animation: loading-fade 0.2s ease-out;
+}
+
+/* 중앙 카드 — Figma: 240px / radius 12 / padding 20 / gap 20 / shadow 0 12 32 (10%) */
+.loading__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 240px;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* 스피너 — 32×32, 옅은 라벤더 트랙 + 보라 진행 아크(라운드 캡) 회전 */
+.loading__spinner {
+  width: 32px;
+  height: 32px;
+  animation: loading-spin 0.9s linear infinite;
+}
+
+.loading__spinner svg {
+  display: block;
+}
+
+.loading__track {
+  stroke: #ece6fb;
+}
+
+.loading__progress {
+  stroke: #8c6fe8;
+  /* 둘레 2π·14.5 ≈ 91.1 → 약 200° 아크 */
+  stroke-dasharray: 50 42;
+}
+
+/* 텍스트 묶음 — Figma: gap 8 */
+.loading__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+/* 타이틀 — Pretendard SemiBold 18 / lh 100% / #191919 */
+.loading__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+}
+
+/* 보조 문구 — Pretendard Regular 12 / lh 100% / #B0B0B0 */
+.loading__desc {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--muted);
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loading-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading__spinner {
+    animation-duration: 2s;
+  }
+}
