@@ -1,0 +1,70 @@
+/* 카드 프리뷰 내부 콘텐츠 (검은 배경 위, 패딩/space-between은 Card의 .card__content가 담당).
+   Figma iPhone 17-19 카드 — #3/#4/#5 공용. */
+
+/* 상단 그룹: Q뱃지 ↔ 날짜 ↔ 질문, 세로 gap 8 */
+.card-preview__top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Q 뱃지: 26×26 흰 원, 안에 어두운 Q */
+.card-preview__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* 날짜: Pretendard 500 / 10 / 흰색 */
+.card-preview__date {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--on-ink);
+}
+
+/* 질문(재노출): Pretendard 700 / 12 / 보조 텍스트, 2줄 중앙 */
+.card-preview__question {
+  margin: 0;
+  max-width: 200px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink-dim);
+}
+
+/* 하단 그룹: 구분선 ↔ 답변, 세로 gap 12 */
+.card-preview__bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+/* 구분선: 11×2 흰 선 */
+.card-preview__divider {
+  width: 11px;
+  height: 2px;
+  background: var(--on-ink);
+  border-radius: 1px;
+}
+
+/* 답변: Pretendard 700 / 20 / 흰색, 줄바꿈 반영 */
+.card-preview__answer {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--on-ink);
+  white-space: pre-line;
+}

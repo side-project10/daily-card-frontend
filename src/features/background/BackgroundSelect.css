@@ -1,0 +1,169 @@
+/* 화면 #3 배경 선택 — Figma iPhone 17 - 19 (874 높이 프레임 기준).
+   공용 프레임은 `.screen`(min-height:100dvh). 요소 크기는 Figma대로 고정(px)하되,
+   상·하단 앵커는 874 비율의 dvh로 잡고 카드↔하단섹션 사이 여백을 가변으로 흡수해
+   기기 높이에 대응한다. (온보딩·오늘의질문과 동일한 방식) */
+.bg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 6.18dvh; /* 54 / 874 — 상태바 영역 */
+  padding-bottom: 9.6dvh; /* 84 / 874 — Figma 버튼 하단 여백 (역산: 헤더↔카드 44, 카드↔섹션 65가 874에서 맞도록) */
+}
+
+/* 헤더: < 뒤로가기 (Pretendard 500 / 14 / #B0B0B0), padding 0 20 */
+.bg__back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--muted);
+}
+.bg__back svg {
+  display: block;
+}
+
+/* 콘텐츠: 카드(상단) + 하단섹션. flex:1로 세로 공간을 채우고,
+   하단섹션을 margin-top:auto로 밀어 카드↔섹션 여백을 가변화(기기 높이 대응).
+   874 기준 이 가변 여백 ≈ 65px로 Figma Frame45 gap과 일치. */
+.bg__content {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 44px; /* 헤더 ↔ 카드 (Figma 44px) */
+}
+
+/* 카드 프리뷰 내부 콘텐츠는 CardPreview 컴포넌트(components/CardPreview)로 분리됨. */
+
+/* ── 하단 섹션: 안내문 ↔ 컨트롤 gap 24 (Figma Frame 74) ──
+   margin-top:auto로 콘텐츠 하단에 고정 → 카드와의 간격이 가변 여백이 된다. */
+.bg__section {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+/* 안내문: Pretendard 500 / 14 / #B0B0B0, ⓘ 아이콘 + 텍스트 중앙 */
+.bg__helper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--muted);
+}
+.bg__helper-icon {
+  flex-shrink: 0;
+}
+
+/* 컨트롤: (탭+스와치) ↔ 버튼 gap 44 (Figma Frame 47) */
+.bg__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+  width: 100%;
+}
+
+/* 탭+스와치 묶음: gap 16 (Figma Frame 43) */
+.bg__picker {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* 탭바: 3등분, gap 10, padding 0 20 */
+.bg__tabs {
+  display: flex;
+  gap: 10px;
+  padding: 0 20px;
+  width: 100%;
+}
+
+/* 탭: height 41, radius 4, border 1, Pretendard 500 / 14 / 중앙 (비활성 옅은 보더) */
+.bg__tab {
+  flex: 1;
+  height: 41px;
+  padding: 12px 16px;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  background: var(--surface);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--line-soft);
+}
+/* 활성 탭: 강조 보더 / 진한 글자 */
+.bg__tab.is-active {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+/* 준비 중(그라데이션/패턴 등 빈 탭) 안내 */
+.bg__empty {
+  margin: 0;
+  padding: 24px 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* 스와치 그리드: 6열 × 2행, 각 44×44, 열 space-between, 행 gap 10, padding 0 20 */
+.bg__swatches {
+  display: grid;
+  grid-template-columns: repeat(6, 44px);
+  justify-content: space-between;
+  row-gap: 10px;
+  padding: 0 20px;
+  width: 100%;
+}
+
+/* 스와치: 44×44, radius 4 */
+.bg__swatch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+/* 밝아서 흰 배경과 구분이 어려운 스와치(데이터의 border 플래그)는 옅은 테두리 */
+.bg__swatch.is-bordered {
+  border: 1px solid var(--line-faint);
+}
+
+/* 선택 체크: 어두운 배경엔 흰 체크, 밝은 배경(is-light)엔 어두운 체크 */
+.bg__check {
+  display: block;
+  color: var(--on-ink);
+}
+.bg__swatch.is-light .bg__check {
+  color: var(--ink);
+}
+
+/* 버튼 영역: padding 0 20 (Figma Frame 3) */
+.bg__cta {
+  padding: 0 20px;
+  width: 100%;
+}

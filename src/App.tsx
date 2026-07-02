@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Onboarding from './features/onboarding/Onboarding'
 import TodayQuestion from './features/question/TodayQuestion'
 import AnswerWrite from './features/answer/AnswerWrite'
+import BackgroundSelect from './features/background/BackgroundSelect'
 import type { Step } from './app/steps'
 import './App.css'
 
@@ -9,6 +10,8 @@ function App() {
   const [step, setStep] = useState<Step>('onboarding')
   // 답변 작성 화면에 재노출할 질문. 오늘의 질문 로딩 완료 후 넘겨받는다.
   const [question, setQuestion] = useState('')
+  // 배경 선택/카드 화면에 노출할 사용자의 답변.
+  const [answer, setAnswer] = useState('')
 
   return (
     <div className="app">
@@ -25,7 +28,22 @@ function App() {
       )}
 
       {step === 'answer' && (
-        <AnswerWrite question={question} onSubmit={() => setStep('card')} />
+        <AnswerWrite
+          question={question}
+          onSubmit={(a) => {
+            setAnswer(a)
+            setStep('background')
+          }}
+        />
+      )}
+
+      {step === 'background' && (
+        <BackgroundSelect
+          question={question || undefined}
+          answer={answer || undefined}
+          onBack={() => setStep('answer')}
+          onCreate={() => setStep('card')}
+        />
       )}
 
       {/* TODO: 카드 결과(4번) 화면 구현 예정 — 현재는 플레이스홀더 */}

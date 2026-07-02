@@ -4,9 +4,13 @@
   /* 디자인 토큰 (Figma) */
   --ink: #191919;
   --ink-strong: #141414;
+  --ink-dim: #6e6e6e; /* 어두운 배경 위 보조 텍스트 (카드 질문 재노출) */
   --muted: #b0b0b0;
   --surface: #ffffff; /* 기본 배경(면) */
   --on-ink: #ffffff; /* 어두운 배경 위 글자 */
+  --line-strong: #666666; /* 강조 보더 (활성 탭) */
+  --line-soft: #d1d1d1; /* 옅은 보더 / 비활성 텍스트 (비활성 탭) */
+  --line-faint: #e5e5e5; /* 흰 스와치 구분용 옅은 보더 */
   --dot-active: #393939;
   --dot-idle: #bababa;
   --toast-bg: rgba(48, 48, 48, 0.4); /* 상단 토스트 배경 (Figma) */

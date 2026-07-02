@@ -18,3 +18,15 @@
   pointer-events: none;
   user-select: none;
 }
+
+/* 카드 내부 콘텐츠 오버레이 (Figma: padding 20, 세로 space-between, 가운데 정렬). */
+.card__content {
+  position: absolute;
+  inset: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+}
