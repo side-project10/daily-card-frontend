@@ -17,6 +17,7 @@
   --line: #b2b2b2; /* 입력 테두리 / placeholder */
   --disabled-bg: #b1b1b1; /* 비활성 버튼 배경 */
   --disabled-text: #cfcfcf; /* 비활성 버튼 글자 */
+  --btn-secondary: #838383; /* 보조 버튼 배경 (Figma Secondary) */
 
   font: 16px/1.5 var(--sans);
   color-scheme: light dark;

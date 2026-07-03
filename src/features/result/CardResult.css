@@ -1,0 +1,31 @@
+/* 화면 #4 내 카드 결과 — Figma iPhone 17 - 9 (402×874 프레임 기준).
+   공용 프레임은 `.screen`(min-height:100dvh, overflow:hidden). 위→아래: 상태바 영역 →
+   헤더 → 카드 → 액션 버튼. Figma 세로 간격(헤더↔카드 88, 카드↔버튼 72)은 874 비율의 dvh로
+   앵커해 기기 높이에 따라 함께 줄어든다 → 짧은 화면에서 버튼이 잘리지 않게(배경선택과 동일 전략). */
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 6.18dvh; /* 54 / 874 — 상태바 영역 (오늘의질문·배경선택과 동일) */
+}
+
+/* 헤더 "< 뒤로가기"는 공용 BackButton 컴포넌트(components/BackButton)로 분리됨. */
+
+/* 콘텐츠: 카드(상단) + 액션 버튼. 헤더↔카드 88/874, 카드↔버튼 72/874 (Figma Frame 76 gap). */
+.result__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 10.07dvh; /* 88 / 874 — 헤더 ↔ 카드 */
+  gap: 8.24dvh; /* 72 / 874 — 카드 ↔ 버튼 */
+}
+
+/* 액션 버튼: 세로 2개, gap 10, 좌우 20 (Figma Frame 3 — 각 버튼 폭 402-40=362). */
+.result__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 0 20px;
+}

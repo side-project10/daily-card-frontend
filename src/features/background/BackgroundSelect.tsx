@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import CardPreview from '../../components/CardPreview/CardPreview'
 import Button from '../../components/Button/Button'
+import BackButton from '../../components/BackButton/BackButton'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { isLight } from '../../lib/color'
 import { BG_TABS, SWATCHES, TAB_KIND } from './backgrounds'
@@ -54,12 +55,7 @@ function BackgroundSelect({
   return (
     <div className="screen bg">
       {/* 헤더: < 뒤로가기 */}
-      <button type="button" className="bg__back" onClick={onBack}>
-        <svg width="8" height="14" viewBox="0 0 8 14" fill="none" aria-hidden="true">
-          <path d="M7 1 1 7l6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <span>뒤로가기</span>
-      </button>
+      <BackButton onClick={onBack} />
 
       <div className="bg__content">
         {/* 카드 프리뷰 — 선택한 배경 즉시 반영 */}
