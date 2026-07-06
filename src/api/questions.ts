@@ -1,5 +1,5 @@
 import { todayKeyKST } from '../lib/date'
-import type { TodayAnswer, TodayQuestion } from '../types/question'
+import type { AnswerCard, DateKey, TodayAnswer, TodayQuestion } from '../types/question'
 
 /**
  * ⚠️ 목(mock) API — 백엔드가 아직 없어 샘플 데이터를 지연과 함께 반환한다.
@@ -9,8 +9,35 @@ import type { TodayAnswer, TodayQuestion } from '../types/question'
 
 const delay = (ms = 500) => new Promise((r) => setTimeout(r, ms))
 
-/** 완료 모달 흐름을 눈으로 확인할 때 true 로 토글 (오늘 이미 답변한 상태). */
-const MOCK_ALREADY_ANSWERED = false
+/**
+ * 목(mock) 서버 저장소 — 백엔드 전이므로 오늘 저장한 답변을 localStorage에 흉내 낸다.
+ * 실제 서버가 붙으면 아래 저장/조회 함수 본문만 엔드포인트 호출로 교체한다.
+ * (서버가 `(익명ID, 날짜)` 유니크로 1일 1회를 강제하는 것을 로컬로 근사)
+ */
+const ANSWER_STORE_KEY = 'daily-card:today-answer'
+
+/** 오늘 저장된 답변 한 건 (재진입 시 완료 카드 복원에 필요한 최소 정보). */
+export interface StoredAnswer {
+  dateKey: DateKey
+  question: string
+  card: AnswerCard
+}
+
+/**
+ * 오늘 날짜로 저장된 답변을 **동기**로 반환. (날짜가 다르거나 없으면 null)
+ * 초기 라우팅/완료 카드 시드에 쓰인다. 백엔드 전이므로 로컬 기록으로 근사하며,
+ * 서버가 붙으면 `GET /answers/today` 응답으로 대체한다.
+ */
+export function getStoredAnswer(): StoredAnswer | null {
+  try {
+    const raw = localStorage.getItem(ANSWER_STORE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as StoredAnswer
+    return parsed.dateKey === todayKeyKST() ? parsed : null
+  } catch {
+    return null
+  }
+}
 
 /**
  * 오늘의 질문 조회.
@@ -34,11 +61,29 @@ export async function fetchTodayQuestion(): Promise<TodayQuestion> {
 export async function fetchTodayAnswer(anonId: string): Promise<TodayAnswer> {
   void anonId // 실제 구현에서 익명ID 헤더로 전달
   await delay()
-  if (MOCK_ALREADY_ANSWERED) {
-    return {
-      exists: true,
-      card: { answer: '친구와 오랜만에 통화한 순간', background: 'pink' },
-    }
+  const stored = getStoredAnswer()
+  if (stored) {
+    return { exists: true, card: stored.card }
   }
   return { exists: false }
+}
+
+/**
+ * 답변 + 배경 저장 ("카드 만들기" 시점).
+ * 실제: `POST /answers` (익명ID 헤더) — 서버가 `(익명ID, 날짜)` 유니크로 1일 1회 강제(중복 시 409).
+ * 백엔드 전이므로 오늘 날짜로 localStorage에 기록해, 재진입 시 완료 화면(오늘 답변함)이 뜨게 한다.
+ */
+export async function saveTodayAnswer(
+  anonId: string,
+  question: string,
+  card: AnswerCard,
+): Promise<void> {
+  void anonId // 실제 구현에서 익명ID 헤더로 전달
+  await delay()
+  try {
+    const payload: StoredAnswer = { dateKey: todayKeyKST(), question, card }
+    localStorage.setItem(ANSWER_STORE_KEY, JSON.stringify(payload))
+  } catch {
+    // 스토리지 접근 불가(시크릿 모드 등) 시 무시 — best-effort
+  }
 }

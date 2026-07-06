@@ -1,26 +1,24 @@
 import { useEffect, useState } from 'react'
 import Button from '../../components/Button/Button'
 import Card from '../../components/Card/Card'
-import Modal from '../../components/Modal/Modal'
 import Toast from '../../components/Toast/Toast'
 import { useTodayQuestion } from '../../hooks/queries/useTodayQuestion'
-import { useTodayAnswer } from '../../hooks/queries/useTodayAnswer'
 import { getLastSeenDate, setLastSeenDate } from '../../lib/lastSeen'
-import type { Step } from '../../app/steps'
 import cardHero from '../../assets/question/card-hero.png'
 import './TodayQuestion.css'
 
 interface TodayQuestionProps {
-  /** "답변하기" → 답변 작성(2번) 화면으로. 현재 질문 텍스트를 함께 넘긴다. */
-  onNext?: (question: string) => void
-  /** 완료 모달 "카드 다시보기" 등 임의 스텝 이동 */
-  onNavigate?: (step: Step) => void
+  /** "답변하기" → 답변 작성(2번) 화면으로. 현재 질문 텍스트와 날짜 키를 함께 넘긴다. */
+  onNext?: (question: string, date: string) => void
 }
 
-/** 화면 #1 오늘의 질문 (Figma iPhone 17-3). */
-function TodayQuestion({ onNext, onNavigate }: TodayQuestionProps) {
+/**
+ * 화면 #1 오늘의 질문 (Figma iPhone 17-3).
+ * 오늘 답변한 사용자는 App 라우팅이 완료 카드(#4)로 직행시키므로, 이 화면은 **미답변 상태 전용**이다.
+ * (재진입 완료 화면은 CardResult가 담당 — 여기선 질문 노출 + "새 질문 도착" 토스트만.)
+ */
+function TodayQuestion({ onNext }: TodayQuestionProps) {
   const question = useTodayQuestion()
-  const answer = useTodayAnswer()
   // 마운트 시점의 "마지막 본 날짜"를 고정 스냅샷 (렌더 중 파생 계산에 사용)
   const [lastSeenAtMount] = useState(getLastSeenDate)
   const [toastDismissed, setToastDismissed] = useState(false)
@@ -51,8 +49,6 @@ function TodayQuestion({ onNext, onNavigate }: TodayQuestionProps) {
   }
 
   const q = question.data
-  // 재진입 체크 2 — 오늘 답변 기록이 있으면 완료 모달. (서버 기록이 단일 진실)
-  const showCompletion = answer.data?.exists === true
 
   return (
     <div className="screen today">
@@ -72,17 +68,8 @@ function TodayQuestion({ onNext, onNavigate }: TodayQuestionProps) {
       </div>
 
       <div className="today__footer">
-        <Button onClick={() => onNext?.(q.text)}>답변하기</Button>
+        <Button onClick={() => onNext?.(q.text, q.dateKey)}>답변하기</Button>
       </div>
-
-      {showCompletion && (
-        <Modal
-          title="오늘은 이미 답변했어요"
-          description="하루에 한 번만 답변할 수 있어요. 완성한 카드를 다시 볼 수 있어요."
-          actionLabel="카드 다시보기"
-          onAction={() => onNavigate?.('card')}
-        />
-      )}
     </div>
   )
 }

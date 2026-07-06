@@ -21,6 +21,15 @@
   gap: 8.24dvh; /* 72 / 874 — 카드 ↔ 버튼 */
 }
 
+/* 하단 그룹: 액션 버튼 + (완료 시) 완료 안내/카운트다운. 버튼 그룹 ↔ 완료 안내 24px. */
+.result__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
 /* 액션 버튼: 세로 2개, gap 10, 좌우 20 (Figma Frame 3 — 각 버튼 폭 402-40=362). */
 .result__actions {
   display: flex;
@@ -28,4 +37,70 @@
   gap: 10px;
   width: 100%;
   padding: 0 20px;
+}
+
+/* ── 완료(재진입) 상태 전용 (completed=true일 때만 렌더) ──
+   Figma 섹션 "1번의 답변을 하고 다시 들어왔을때": 완료 안내 + 다음 질문까지 카운트다운. */
+.result__status {
+  display: flex;
+  width: 100%; /* Figma Frame 58: Width Fill(402) — 전체 폭. (hug-content 아님) */
+  flex-direction: column;
+  align-items: center;
+  gap: 12px; /* Figma Frame 58 gap: 안내문 ↔ 타이머 그룹 */
+}
+
+/* Figma Frame 57: 타이머 박스 + 캡션을 묶는 그룹 (status와 다른 gap 8). */
+.result__timer-group {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* "오늘 답변은 완료했어요" — 진한 본문 */
+.result__notice {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+}
+
+/* 카운트다운 박스: 옅은 테두리 + 라운드, 라벨↔숫자 세로 배치 */
+.result__timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px; /* Figma Frame 59 gap */
+  min-width: 214px; /* Figma Frame 59 width: Hug(214) */
+  padding: 8px 16px 8px 16px;
+  border: 1px solid var(--line-faint);
+  border-radius: 4px;
+}
+
+/* "내일 새 질문까지" — 옅은 라벨 */
+.result__timer-label {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--muted);
+}
+
+/* "12:36:33" — 진한 볼드 숫자 (자릿수 흔들림 방지 tabular) */
+.result__timer-value {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* "매일 자정 새로운 질문이 열려요" — 옅은 캡션 */
+.result__caption {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--muted);
 }
