@@ -10,7 +10,7 @@
   overscroll-behavior: none;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
     env(safe-area-inset-left);
-  background: #d9d9d9; /* 레터박스 여백(프레임 바깥) 색 — 필요 시 조정 */
+  background: var(--surface); /* 레터박스 여백(프레임 바깥) 색 — 필요 시 조정 */
 }
 
 /* 디자인 프레임 (402×874 고정 캔버스). --fit 배율로 통째 균일 축소 → 비율 유지, 리플로우 없음.
