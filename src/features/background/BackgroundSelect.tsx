@@ -17,8 +17,8 @@ interface BackgroundSelectProps {
   date?: string
   /** 헤더 "뒤로가기" */
   onBack?: () => void
-  /** "카드 만들기" — 선택한 배경(CSS 값)과 함께 결과(4번)로. */
-  onCreate?: (background: string) => void
+  /** "카드 만들기" — 선택한 배경의 스와치 id를 결과(4번)로. (value/light는 id에서 파생) */
+  onCreate?: (backgroundId: string) => void
 }
 
 /**
@@ -39,7 +39,10 @@ function BackgroundSelect({
   const [creating, setCreating] = useState(false)
   const timerRef = useRef<number | undefined>(undefined)
 
-  const selectedBg = SWATCHES.find((s) => s.id === selected)?.value ?? SWATCHES[0].value
+  const selectedSwatch = SWATCHES.find((s) => s.id === selected) ?? SWATCHES[0]
+  const selectedBg = selectedSwatch.value
+  // 배경이 밝은지: 스와치가 명시(light)하면 그 값, 아니면 hex에서 자동 판별. → 카드 글자 반전
+  const selectedLight = selectedSwatch.light ?? isLight(selectedSwatch.value)
   // 활성 탭에 해당하는 스와치만 노출. (그라데이션/패턴은 데이터 추가 시 자동 노출)
   const visible = SWATCHES.filter((s) => s.kind === TAB_KIND[tab])
 
@@ -49,7 +52,7 @@ function BackgroundSelect({
   const handleCreate = () => {
     if (creating) return
     setCreating(true)
-    timerRef.current = window.setTimeout(() => onCreate?.(selectedBg), 1200)
+    timerRef.current = window.setTimeout(() => onCreate?.(selected), 1200)
   }
 
   return (
@@ -59,7 +62,7 @@ function BackgroundSelect({
 
       <div className="bg__content">
         {/* 카드 프리뷰 — 선택한 배경 즉시 반영 */}
-        <CardPreview question={question} answer={answer} date={date} background={selectedBg} />
+        <CardPreview question={question} answer={answer} date={date} background={selectedBg} onLight={selectedLight} />
 
         <div className="bg__section">
           <p className="bg__helper">
@@ -93,7 +96,7 @@ function BackgroundSelect({
               {visible.length > 0 ? (
                 <div className="bg__swatches">
                   {visible.map((s) => {
-                    const light = s.kind === 'color' && isLight(s.value)
+                    const light = s.light ?? isLight(s.value)
                     return (
                       <button
                         key={s.id}

@@ -15,6 +15,8 @@ interface CardResultProps {
   date?: string
   /** 3번에서 선택한 카드 배경(CSS 값). 미지정 시 Figma 샘플 보라 그라데이션. */
   background?: string
+  /** 배경이 밝은지(글자 반전). 이미지 배경은 CSS로 밝기를 못 재므로 선택 시점의 판정을 전달받는다. */
+  onLight?: boolean
   /**
    * 완료(재진입) 상태 여부. 저장된 값이 있으면(오늘 이미 답변) true로 켜서
    * "오늘 답변은 완료했어요" + 카운트다운을 추가로 노출한다. (별도 화면 없이 bool로 분기)
@@ -109,6 +111,7 @@ function CardResult({
   answer = '‘세이노의 가르침’.\n곱씹을수록 새로운 문장을 발견하게 되는 책.',
   date = '2026-12-05',
   background = SAMPLE_BG,
+  onLight,
   completed = false,
   deadline,
   onBack,
@@ -137,7 +140,7 @@ function CardResult({
 
       <div className="result__content">
         {/* 완성 카드 — 배경 선택 결과 반영 (#3/#4/#5 공용 프리뷰) */}
-        <CardPreview question={question} answer={answer} date={date} background={background} />
+        <CardPreview question={question} answer={answer} date={date} background={background} onLight={onLight} />
 
         <div className="result__footer">
           {/* 액션: 다운로드(primary) / 타인 답변(secondary) — Figma Frame 3 */}

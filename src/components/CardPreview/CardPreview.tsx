@@ -11,6 +11,11 @@ interface CardPreviewProps {
   date: string
   /** 카드 배경 CSS 값(색/그라데이션/이미지). 미지정 시 Figma 기본 검정. */
   background?: string
+  /**
+   * 배경이 밝은지 명시적으로 지정 → 밝으면 글자를 어둡게 반전.
+   * 이미지 배경처럼 CSS 문자열로 밝기를 알 수 없을 때 사용. 미지정 시 background hex에서 자동 판별.
+   */
+  onLight?: boolean
 }
 
 /** Figma 카드 기본 배경(검정). 톤 판별과 실제 배경이 항상 같은 값을 보도록 여기서 소유. */
@@ -21,13 +26,14 @@ const DEFAULT_BG = '#191919'
  * 배경 선택(#3)·내 카드 결과(#4)·타인 답변(#5)에서 공통으로 재사용한다.
  * 컨테이너(정사각/라운드/배경)는 Card, 내부 콘텐츠 조합만 여기서 담당.
  */
-function CardPreview({ question, answer, date, background = DEFAULT_BG }: CardPreviewProps) {
+function CardPreview({ question, answer, date, background = DEFAULT_BG, onLight }: CardPreviewProps) {
   // 배경이 밝으면(상대 휘도 높음) 흰 글자가 안 보이므로 어두운 글자로 반전한다.
-  // (hex가 아닌 값 — 그라데이션/이미지 등 — 은 어두운 배경으로 간주해 흰 글자 유지)
-  const onLight = isLight(background)
+  // 밝기를 명시(onLight)하면 그 값을 쓰고, 없으면 hex에서 자동 판별.
+  // (hex가 아닌 값 — 그라데이션/이미지 등 — 은 onLight로만 밝음을 알 수 있고, 미지정 시 어두운 배경으로 간주)
+  const light = onLight ?? isLight(background)
 
   return (
-    <Card background={background} className={onLight ? 'card-preview--on-light' : undefined}>
+    <Card background={background} className={light ? 'card-preview--on-light' : undefined}>
       <div className="card-preview__top">
         <span className="card-preview__badge">Q</span>
         <span className="card-preview__date">{date}</span>

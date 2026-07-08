@@ -3,6 +3,7 @@ import Onboarding from './features/onboarding/Onboarding'
 import TodayQuestion from './features/question/TodayQuestion'
 import AnswerWrite from './features/answer/AnswerWrite'
 import BackgroundSelect from './features/background/BackgroundSelect'
+import { resolveBackground } from './features/background/backgrounds'
 import CardResult from './features/result/CardResult'
 import OtherAnswer from './features/others/OtherAnswer'
 import type { Step } from './app/steps'
@@ -28,6 +29,7 @@ function App() {
   const [question, setQuestion] = useState(saved?.question ?? '')
   const [date, setDate] = useState(saved?.dateKey ?? '')
   const [answer, setAnswer] = useState(saved?.card.answer ?? '')
+  // 배경의 정체성은 스와치 id 하나. CSS 값·밝기는 렌더 시점에 resolveBackground로 파생한다.
   const [background, setBackground] = useState(saved?.card.background ?? '')
 
   // 레터박스 스케일: 402×874 고정 프레임을 실제 가용 영역(.app content-box)에 맞춰 균일 축소한다.
@@ -47,6 +49,9 @@ function App() {
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
+
+  // 저장/전달되는 배경 id를 렌더용 { value, light }로 파생. 미선택(빈 id)이면 각 화면 기본 배경에 맡긴다.
+  const bg = background ? resolveBackground(background) : null
 
   return (
     <div className="app" ref={appRef}>
@@ -78,10 +83,10 @@ function App() {
             question={question || undefined}
             answer={answer || undefined}
             onBack={() => setStep('answer')}
-            onCreate={(bg) => {
-              setBackground(bg)
+            onCreate={(bgId) => {
+              setBackground(bgId)
               // "카드 만들기" = 저장 시점. 방금 만든 결과(#4)는 완료 안내 없이 보여준다(completed=false).
-              void saveTodayAnswer(getAnonId(), question, { answer, background: bg })
+              void saveTodayAnswer(getAnonId(), question, { answer, background: bgId })
               setCompleted(false)
               setStep('card')
             }}
@@ -92,7 +97,8 @@ function App() {
           <CardResult
             question={question || undefined}
             answer={answer || undefined}
-            background={background || undefined}
+            background={bg?.value}
+            onLight={bg?.light}
             date={date || undefined}
             // 재진입/내 카드보기(completed)면 완료 안내·카운트다운을 켠다.
             // 방금 만든 결과(#4)면 배경 선택으로 되돌아가고, 완료 화면은 돌아갈 곳이 없어 뒤로가기를 숨긴다.
@@ -106,7 +112,8 @@ function App() {
         {step === 'others' && (
           <OtherAnswer
             question={question || undefined}
-            background={background || undefined}
+            background={bg?.value}
+            onLight={bg?.light}
             // TODO: 타인 답변은 API(같은 질문의 무작위 답변 1개) 연동 후 주입 — 지금은 샘플 기본값
             // "내 카드보기" → 완료 카드(#4 재사용, completed)로 즉시 이동. (서버조회 없음)
             onViewMyCard={() => {

@@ -16,6 +16,8 @@ interface OtherAnswerProps {
    * 텍스트 색은 CardPreview가 이 배경의 명암에 따라 자동 반전한다. 미지정 시 #4와 동일한 샘플 배경.
    */
   background?: string
+  /** 뒤 카드(내 카드) 배경이 밝은지(글자 반전). 이미지 배경의 밝기 판정을 전달받는다. */
+  onLight?: boolean
   /**
    * "다른 사람 카드 다운받기" 클릭 시 호출(선택). 실제 저장은 카드 영역을 이미지로
    * 캡쳐하는 방식으로 추후 구현한다. (지금은 완료 토스트만 노출)
@@ -68,6 +70,7 @@ function OtherAnswer({
   answer = '불편한 편의점.\n혼자 있을수록 사람 냄새가\n그리울 것 같아서.',
   date = '2026.12.05',
   background = MY_CARD_BG,
+  onLight,
   onDownload,
   onViewMyCard,
 }: OtherAnswerProps) {
@@ -92,7 +95,7 @@ function OtherAnswer({
         {/* 카드 스택: 뒤(밝은 라벤더, 흐림) + 앞(검정 CardPreview — 타인 답변) */}
         <div className="other__stack">
           <div className="other__card-behind" aria-hidden="true">
-            <CardPreview question={question} answer={answer} date={date} background={background} />
+            <CardPreview question={question} answer={answer} date={date} background={background} onLight={onLight} />
           </div>
           {/* 흰색 발광(eclipse): 뒤 카드 상단을 흰 배경으로 자연스럽게 흐리며 타이틀 주변을 밝힌다. */}
           <span className="other__glow" aria-hidden="true" />

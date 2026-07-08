@@ -11,7 +11,10 @@ export interface TodayQuestion {
 /** 카드 결과(4번 화면)에서 필요한 최소 정보 */
 export interface AnswerCard {
   answer: string
-  /** 배경 식별자 (컬러/그라디언트/이미지) */
+  /**
+   * 배경 스와치 id (예: 'black', 'grad-1'). 렌더 시점에 `resolveBackground(id)`로
+   * CSS 값·밝기를 파생한다. (해시가 바뀌는 이미지 URL을 저장하지 않아 재배포에도 안 깨짐)
+   */
   background: string
 }
 
