@@ -1,19 +1,20 @@
 /* 화면 #5 타인 답변 보기 — Figma iPhone 17 - 11 (402×874 프레임 기준).
    위→아래: 상태바 영역 → 타이틀 → 카드 스택 → 안내문구 → 액션(다운로드/내 카드 보기).
-   세로 간격은 874 비율의 dvh로 앵커해 기기 높이에 따라 함께 줄어든다(#3/#4와 동일 전략). */
+   세로 간격은 874 기준 고정 px로 앵커한다: 뭉치(타이틀~버튼)는 기기 높이와 무관하게 항상
+   동일한 모양을 유지하고, 남는 세로 여백은 버튼 아래로 쌓인다(top-anchored). 뷰포트보다
+   길어지면 `.screen`이 늘어나 문서가 스크롤되므로 짧은 화면에서도 버튼이 잘리지 않는다. */
 .other {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 6.18dvh; /* 54 / 874 — 상태바 영역 (다른 화면과 동일) */
+  padding-top: 50px; /* 상태바 영역 여백 (Figma ~2.18% of 874) */
+  padding-bottom: 10px;
 }
 
 /* 타이틀: Pretendard SemiBold 600 / 14 / line-height 150% / 자간 -2% / 진한 잉크, 2줄 중앙 (Figma). */
 .other__title {
   position: relative;
   z-index: 3; /* 발광(glow z1)·앞 카드(z2) 위로 — 문구는 항상 또렷하게 */
-  margin: 0;
-  margin-top: 9.6dvh; /* 84 / 874 — 상태바 ↔ 타이틀 */
   font-size: 14px;
   font-weight: 600;
   line-height: 1.5;
@@ -28,7 +29,7 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: 10.07dvh; /* 88 / 874 — 타이틀 ↔ 카드 */
+  margin-top: 48px; /* 타이틀 ↔ 카드 */
 }
 
 /* 카드 스택: 앞(검정 CardPreview)을 기준으로 뒤 카드가 위로 삐져나와 겹친다. */
@@ -76,8 +77,8 @@
 
 /* 안내문구: Pretendard 500 / 11 / 흐린 회색, 2줄 중앙 + 앞에 작은 스파클. */
 .other__note {
-  margin: 0;
-  margin-top: 20px; /* 카드 ↔ 안내문구 */
+  /* 카드 ↔ 안내문구 */
+  margin: 20px 0 20px 0;
   font-size: 11px;
   font-weight: 500;
   line-height: 1.6;
@@ -97,7 +98,7 @@
   gap: 14px;
   width: 100%;
   padding: 0 20px;
-  margin-top: 6dvh; /* ~52 / 874 — 안내문구 ↔ 버튼 */
+  margin-top: auto; /* 안내문구 ↔ 버튼 (고정 px) */
 }
 
 /* "내 카드 보기": Pretendard 500 / 13 / 흐린 잉크, 밑줄 텍스트 링크. */
