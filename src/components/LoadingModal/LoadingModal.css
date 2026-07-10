@@ -1,5 +1,4 @@
-/* 딤 오버레이 — 화면(.screen 프레임) 전체를 덮고 카드를 중앙 정렬.
-   Figma: #000000 30.2% */
+/* 오버레이 — 화면(.screen 프레임) 전체를 덮고 카드를 중앙 정렬. 배경 흰색 60% */
 .loading {
   position: absolute;
   inset: 0;
@@ -8,11 +7,11 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.6);
   animation: loading-fade 0.2s ease-out;
 }
 
-/* 중앙 카드 — Figma: 240px / radius 12 / padding 20 / gap 20 / shadow 0 12 32 (10%) */
+/* 중앙 카드 — Figma: 240px / radius 12 / padding 20 / gap 20 / shadow 0 12 32 (10.2%) */
 .loading__card {
   display: flex;
   flex-direction: column;
@@ -22,7 +21,7 @@
   padding: 20px;
   border-radius: 12px;
   background: var(--surface);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.102);
 }
 
 /* 스피너 — 32×32, 옅은 라벤더 트랙 + 보라 진행 아크(라운드 캡) 회전 */
