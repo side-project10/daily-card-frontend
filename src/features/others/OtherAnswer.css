@@ -44,7 +44,7 @@
 .other__card-behind {
   position: absolute;
   inset: -86px 0 auto 0;
-  opacity: 0.6;
+  opacity: 0.28;
   z-index: 0;
 }
 /* 흰색 발광(eclipse) — Figma Ellipse 19(349×76, Radial Gradient #FFF→투명).
@@ -73,6 +73,12 @@
 .other__stack > .card {
   position: relative;
   z-index: 2;
+}
+
+/* 두 답변 카드(앞: 타인 / 뒤: 내 카드)의 테두리는 BackgroundSelect 스와치와 동일하게
+   1px로 통일 (기본 .card 2px 대신). --line-faint = #ededed. */
+.other__stack .card {
+  border: 1px solid var(--line-faint);
 }
 
 /* 안내문구: Pretendard 500 / 11 / 흐린 회색, 2줄 중앙 + 앞에 작은 스파클. */
