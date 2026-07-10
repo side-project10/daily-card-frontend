@@ -6,6 +6,7 @@
   aspect-ratio: 1 / 1;
   border-radius: 20px;
   overflow: hidden;
+  border: 2px solid var(--line-faint);
 }
 
 /* 배경 그래픽 — 카드를 채운다. */
