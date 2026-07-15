@@ -1,72 +1,54 @@
-import { apiPost } from './http'
+import { apiGet, apiPost } from './http'
 import { backgroundKind } from '../features/background/backgrounds'
-import { todayKeyKST } from '../lib/date'
-import type { AnswerCard, DateKey, TodayAnswer, TodayQuestion } from '../types/question'
+import { serviceDateToKey } from '../lib/date'
+import type { AnswerCard, TodayAnswer, TodayQuestion } from '../types/question'
 
 /**
- * ⚠️ 목(mock) API — 백엔드가 아직 없어 샘플 데이터를 지연과 함께 반환한다.
- * 서버 준비 시 각 함수 본문만 아래 주석의 실제 엔드포인트 호출로 교체하면 된다.
- * (React Query의 로딩/에러/캐싱 흐름은 목에서도 그대로 동작한다.)
+ * 서버 연동 API. 인증은 쿠키 전용(anon_id) — apiGet/apiPost가 `credentials: 'include'`로 자동 처리한다.
+ * 로딩/에러/캐싱은 React Query(hooks/queries)가 각 함수의 Promise 위에서 담당한다.
  */
 
-const delay = (ms = 500) => new Promise((r) => setTimeout(r, ms))
+/** `GET /questions/today` 응답. question은 운영자 미등록일이면 null. */
+interface TodayQuestionResponse {
+  question: { id: number; body: string } | null
+  answeredToday: boolean
+  /** KST 자정 기준 서비스 날짜 (UTC ISO-8601). */
+  serviceDate: string
+}
 
-/**
- * 목(mock) 서버 저장소 — 백엔드 전이므로 오늘 저장한 답변을 localStorage에 흉내 낸다.
- * 실제 서버가 붙으면 아래 저장/조회 함수 본문만 엔드포인트 호출로 교체한다.
- * (서버가 `(익명ID, 날짜)` 유니크로 1일 1회를 강제하는 것을 로컬로 근사)
- */
-const ANSWER_STORE_KEY = 'daily-card:today-answer'
-
-/** 오늘 저장된 답변 한 건 (재진입 시 완료 카드 복원에 필요한 최소 정보). */
-export interface StoredAnswer {
-  dateKey: DateKey
-  question: string
-  card: AnswerCard
+/** `GET /answers/me` 응답(본인 오늘 답변). 없으면 null. */
+interface MyAnswerResponse {
+  id: number
+  questionId: number
+  content: string
+  bgType: string
+  bgValue: string
 }
 
 /**
- * 오늘 날짜로 저장된 답변을 **동기**로 반환. (날짜가 다르거나 없으면 null)
- * 초기 라우팅/완료 카드 시드에 쓰인다. 백엔드 전이므로 로컬 기록으로 근사하며,
- * 서버가 붙으면 `GET /answers/today` 응답으로 대체한다.
- */
-export function getStoredAnswer(): StoredAnswer | null {
-  try {
-    const raw = localStorage.getItem(ANSWER_STORE_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as StoredAnswer
-    return parsed.dateKey === todayKeyKST() ? parsed : null
-  } catch {
-    return null
-  }
-}
-
-/**
- * 오늘의 질문 조회.
- * 실제: `GET /questions/today` → { dateKey, questionId, text }
- * (서버가 KST 자정 기준으로 선정, 같은 날 모든 사용자 동일 질문)
+ * 오늘의 질문 조회. `GET /questions/today`
+ * (서버가 KST 자정 기준으로 선정하며, 같은 날 모든 사용자 동일 질문)
+ * 날짜의 단일 진실은 서버 serviceDate이며, 클라 표시용 dateKey(KST)로 변환한다.
+ * 운영자 미등록일(question=null)이면 text=''·questionId=0으로 내린다.
  */
 export async function fetchTodayQuestion(): Promise<TodayQuestion> {
-  await delay()
+  const res = await apiGet<TodayQuestionResponse>('/questions/today')
   return {
-    dateKey: todayKeyKST(),
-    questionId: 1,
-    text: '오늘 하루 가장 행복했던 순간은?',
+    dateKey: serviceDateToKey(res.serviceDate),
+    questionId: res.question?.id ?? 0,
+    text: res.question?.body ?? '',
   }
 }
 
 /**
- * 오늘 저장된 답변 존재 여부 조회. (사용자 식별은 anon_id 쿠키가 자동 처리)
- * 실제: `GET /answers/today` → 있으면 카드, 없으면 404/null.
- * 404/null 은 exists=false 로 매핑한다. (409 중복은 저장 화면 몫)
+ * 오늘 본인 답변 조회 (재진입 시 완료 카드 복원용). `GET /answers/me`
+ * 사용자 식별은 anon_id 쿠키가 자동 처리하며, 서버 기록이 단일 진실이다.
+ * 없으면 200 + null 본문 → exists=false 로 매핑. (배경은 A안이라 bgValue가 곧 스와치 id)
  */
 export async function fetchTodayAnswer(): Promise<TodayAnswer> {
-  await delay()
-  const stored = getStoredAnswer()
-  if (stored) {
-    return { exists: true, card: stored.card }
-  }
-  return { exists: false }
+  const res = await apiGet<MyAnswerResponse | null>('/answers/me')
+  if (!res) return { exists: false }
+  return { exists: true, card: { answer: res.content, background: res.bgValue } }
 }
 
 /**
@@ -78,13 +60,9 @@ export async function fetchTodayAnswer(): Promise<TodayAnswer> {
  *
  * 배경은 A안: bgValue에 **스와치 id**를 그대로 싣고, bgType(종류)은 카탈로그에서 파생한다.
  * (컬러/그라데이션/이미지 일관 — 빌드마다 바뀌는 이미지 URL을 저장하지 않아 재배포에도 안 깨짐.)
- *
- * 저장 성공 후 오늘 기록을 localStorage에 캐시한다. 서버가 단일 진실이지만, 재진입 시드
- * (getStoredAnswer)가 동기 접근이라 GET /answers/me 연동 전까지 이 캐시로 완료 카드를 복원한다.
  */
 export async function saveTodayAnswer(
   questionId: number,
-  question: string,
   card: AnswerCard,
 ): Promise<void> {
   await apiPost('/answers', {
@@ -93,10 +71,4 @@ export async function saveTodayAnswer(
     bgType: backgroundKind(card.background),
     bgValue: card.background,
   })
-  try {
-    const payload: StoredAnswer = { dateKey: todayKeyKST(), question, card }
-    localStorage.setItem(ANSWER_STORE_KEY, JSON.stringify(payload))
-  } catch {
-    // 스토리지 접근 불가(시크릿 모드 등) 시 무시 — best-effort
-  }
 }

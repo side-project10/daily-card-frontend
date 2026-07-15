@@ -23,3 +23,11 @@
   transform: scale(var(--fit, 1));
   transform-origin: center center;
 }
+
+/* 초기 서버 조회(오늘의 질문·본인 답변) 동안 프레임을 덮는 로딩 — 중앙 정렬, 옅은 안내색. */
+.app__booting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}

@@ -18,6 +18,16 @@ const KST_OFFSET_MS = 9 * 60 * 60 * 1000
 const DAY_MS = 24 * 60 * 60 * 1000
 
 /**
+ * 서버가 내려준 serviceDate(KST 자정의 UTC ISO)를 표시용 날짜 키(YYYY-MM-DD, KST)로 변환한다.
+ * 예: '2026-06-18T15:00:00.000Z'(= 2026-06-19 00:00 KST) → '2026-06-19'.
+ * 날짜의 단일 진실은 서버 serviceDate이며, 이 함수는 그 값을 KST 벽시계 날짜로 읽어낼 뿐이다.
+ */
+export function serviceDateToKey(serviceDate: string): DateKey {
+  const kst = new Date(new Date(serviceDate).getTime() + KST_OFFSET_MS)
+  return kst.toISOString().slice(0, 10)
+}
+
+/**
  * 다음 KST 자정(새 질문이 열리는 시각)의 **절대 시각**을 Date로 돌려준다.
  * "내일 새 질문까지" 카운트다운의 목표 시각으로 쓴다.
  *
