@@ -31,9 +31,9 @@ export function serviceDateToKey(serviceDate: string): DateKey {
  * 다음 KST 자정(새 질문이 열리는 시각)의 **절대 시각**을 Date로 돌려준다.
  * "내일 새 질문까지" 카운트다운의 목표 시각으로 쓴다.
  *
- * 주의: `todayKeyKST`와 마찬가지로 날짜의 단일 진실은 **서버가 내려준 값**이다.
- * (기기 시계 조작·타임존 차이 방지) 이 함수는 백엔드 연동 전, 클라 기준으로
- * 목표 시각을 흉내 낼 때만 쓰고, 추후 서버 타임스탬프로 교체한다.
+ * 주의: 날짜의 단일 진실은 **서버가 내려준 값**이다(기기 시계 조작·타임존 차이 방지).
+ * 이 함수는 클라 시계 기준이라, 서버 dateKey가 있으면 `nextKstMidnightAfter`를 쓰고
+ * 이건 dateKey가 없을 때의 폴백으로만 남긴다.
  */
 export function nextKstMidnight(): Date {
   const now = Date.now()
@@ -41,4 +41,15 @@ export function nextKstMidnight(): Date {
   const kstNow = now + KST_OFFSET_MS
   const kstNextMidnight = Math.floor(kstNow / DAY_MS) * DAY_MS + DAY_MS
   return new Date(kstNextMidnight - KST_OFFSET_MS)
+}
+
+/**
+ * 서버가 준 날짜 키(YYYY-MM-DD, KST)의 **다음 KST 자정**(새 질문이 열리는 시각)을
+ * 절대 UTC 시각으로 돌려준다. 카운트다운 목표 시각을 클라 시계가 아니라 **서버 날짜**에서
+ * 파생하기 위한 함수(=serviceDate + 24h). 예: '2026-07-15' → 2026-07-16 00:00 KST.
+ */
+export function nextKstMidnightAfter(dateKey: DateKey): Date {
+  const [year, month, day] = dateKey.split('-').map(Number)
+  // KST (year-month-(day+1)) 00:00 을 UTC로 환산. Date.UTC가 일/월 넘침을 처리한다.
+  return new Date(Date.UTC(year, month - 1, day + 1) - KST_OFFSET_MS)
 }

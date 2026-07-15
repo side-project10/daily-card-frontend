@@ -4,6 +4,7 @@ import TodayQuestion from './features/question/TodayQuestion'
 import AnswerWrite from './features/answer/AnswerWrite'
 import BackgroundSelect from './features/background/BackgroundSelect'
 import { resolveBackground } from './features/background/backgrounds'
+import { nextKstMidnightAfter } from './lib/date'
 import CardResult from './features/result/CardResult'
 import OtherAnswer from './features/others/OtherAnswer'
 import type { Step } from './app/steps'
@@ -124,6 +125,8 @@ function Wizard({ answered, todayText, todayDateKey, todayQuestionId }: WizardPr
           background={bg?.value}
           onLight={bg?.light}
           date={date || undefined}
+          // 카운트다운 목표 = 서버 날짜(dateKey)에서 파생한 다음 KST 자정. (클라 시계 폴백은 CardResult가 담당)
+          deadline={date ? nextKstMidnightAfter(date) : undefined}
           // 재진입/내 카드보기(completed)면 완료 안내·카운트다운을 켠다.
           // 방금 만든 결과(#4)면 배경 선택으로 되돌아가고, 완료 화면은 돌아갈 곳이 없어 뒤로가기를 숨긴다.
           completed={completed}

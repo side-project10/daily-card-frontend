@@ -24,8 +24,8 @@ interface CardResultProps {
   completed?: boolean
   /**
    * "내일 새 질문까지" 카운트다운의 **목표 시각**(새 질문이 열리는 다음 KST 자정). completed일 때만 노출.
-   * 미지정 시 클라 기준 다음 KST 자정으로 대체(추후 서버 타임스탬프 주입). duration이 아니라
-   * 절대 시각이라 낡지 않으며, 화면에서 이 시각까지 매초 감소한다. (도달 시 00:00:00에서 멈춤)
+   * App이 서버 날짜(dateKey=serviceDate)에서 파생해 주입한다. 미지정 시 클라 기준 다음 KST 자정으로 폴백.
+   * duration이 아니라 절대 시각이라 낡지 않으며, 이 시각까지 매초 감소한다. (도달 시 00:00:00에서 멈춤)
    */
   deadline?: Date
   /** 헤더 "뒤로가기" */
