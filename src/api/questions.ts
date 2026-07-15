@@ -54,12 +54,11 @@ export async function fetchTodayQuestion(): Promise<TodayQuestion> {
 }
 
 /**
- * 오늘(익명ID 기준) 저장된 답변 존재 여부 조회.
- * 실제: `GET /answers/today` (익명ID 헤더) → 있으면 카드, 없으면 404/null.
+ * 오늘 저장된 답변 존재 여부 조회. (사용자 식별은 anon_id 쿠키가 자동 처리)
+ * 실제: `GET /answers/today` → 있으면 카드, 없으면 404/null.
  * 404/null 은 exists=false 로 매핑한다. (409 중복은 저장 화면 몫)
  */
-export async function fetchTodayAnswer(anonId: string): Promise<TodayAnswer> {
-  void anonId // 실제 구현에서 익명ID 헤더로 전달
+export async function fetchTodayAnswer(): Promise<TodayAnswer> {
   await delay()
   const stored = getStoredAnswer()
   if (stored) {
@@ -69,16 +68,14 @@ export async function fetchTodayAnswer(anonId: string): Promise<TodayAnswer> {
 }
 
 /**
- * 답변 + 배경 저장 ("카드 만들기" 시점).
- * 실제: `POST /answers` (익명ID 헤더) — 서버가 `(익명ID, 날짜)` 유니크로 1일 1회 강제(중복 시 409).
+ * 답변 + 배경 저장 ("카드 만들기" 시점). (사용자 식별은 anon_id 쿠키가 자동 처리)
+ * 실제: `POST /answers` — 서버가 `(익명ID, 날짜)` 유니크로 1일 1회 강제(중복 시 409).
  * 백엔드 전이므로 오늘 날짜로 localStorage에 기록해, 재진입 시 완료 화면(오늘 답변함)이 뜨게 한다.
  */
 export async function saveTodayAnswer(
-  anonId: string,
   question: string,
   card: AnswerCard,
 ): Promise<void> {
-  void anonId // 실제 구현에서 익명ID 헤더로 전달
   await delay()
   try {
     const payload: StoredAnswer = { dateKey: todayKeyKST(), question, card }

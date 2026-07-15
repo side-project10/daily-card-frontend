@@ -8,7 +8,6 @@ import CardResult from './features/result/CardResult'
 import OtherAnswer from './features/others/OtherAnswer'
 import type { Step } from './app/steps'
 import { getStoredAnswer, saveTodayAnswer } from './api/questions'
-import { getAnonId } from './lib/anonId'
 import './App.css'
 
 /** 디자인 프레임 고정 크기 (Figma iPhone 402×874). 모든 화면이 이 캔버스 위에 그려진다. */
@@ -86,7 +85,7 @@ function App() {
             onCreate={(bgId) => {
               setBackground(bgId)
               // "카드 만들기" = 저장 시점. 방금 만든 결과(#4)는 완료 안내 없이 보여준다(completed=false).
-              void saveTodayAnswer(getAnonId(), question, { answer, background: bgId })
+              void saveTodayAnswer(question, { answer, background: bgId })
               setCompleted(false)
               setStep('card')
             }}
