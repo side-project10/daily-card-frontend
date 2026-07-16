@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 import CardPreview from '../../components/CardPreview/CardPreview'
 import Button from '../../components/Button/Button'
-import Toast from '../../components/Toast/Toast'
+import { useCardDownload } from '../../hooks/useCardDownload'
 import './OtherAnswer.css'
 
 interface OtherAnswerProps {
@@ -23,28 +23,12 @@ interface OtherAnswerProps {
   myBackground?: string
   myLight?: boolean
   /**
-   * "다른 사람 카드 다운받기" 클릭 시 호출(선택). 실제 저장은 카드 영역을 이미지로
-   * 캡쳐하는 방식으로 추후 구현한다. (지금은 완료 토스트만 노출)
+   * "다른 사람 카드 다운받기" 저장이 성공(공유/다운로드)한 뒤 호출되는 알림 훅(선택).
+   * 실제 캡쳐·저장은 앞 카드(타인 답변) 영역을 이미지로 잡아 공용 훅(useCardDownload)이 수행한다.
    */
   onDownload?: () => void
   /** "내 카드 보기" — 내 카드 결과(#4)로 복귀. */
   onViewMyCard?: () => void
-}
-
-/** 다운로드 완료 토스트의 체크 아이콘 (Figma check-contained 20×20 — 흰 원 + 진한 체크). */
-function CheckCircleIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <circle cx="10" cy="10" r="10" fill="currentColor" />
-      <path
-        d="M5.8 10.4 8.6 13.1 14.2 7.2"
-        stroke="#303030"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
 }
 
 /** 안내 문구 앞 작은 스파클 아이콘 (Figma ⊛). */
@@ -62,7 +46,7 @@ function SparkleIcon() {
 /**
  * 화면 #5 타인 답변 보기 (Figma: iPhone 17 - 11 / 402×874 프레임 기준).
  * 같은 질문에 대한 다른 사람의 답변 카드 1개를 스택 형태로 노출한다.
- * [다른 사람 카드 다운받기] = 그 카드를 이미지로 캡쳐해 저장(추후 구현, 지금은 완료 토스트),
+ * [다른 사람 카드 다운받기] = 앞 카드(타인 답변)를 이미지로 캡쳐해 저장(useCardDownload 공용 훅 — 내 카드와 동일),
  * "내 카드 보기" = 내 카드 결과(#4)로 복귀.
  */
 function OtherAnswer({
@@ -77,14 +61,11 @@ function OtherAnswer({
   onDownload,
   onViewMyCard,
 }: OtherAnswerProps) {
-  // 다운로드 시마다 증가 → Toast를 key로 remount 해 애니메이션/타이머를 재시작.
-  const [toastId, setToastId] = useState(0)
+  // 캡쳐 대상 = 앞 카드(타인 답변)의 실제 `.card` 요소. CardPreview → Card로 ref가 전달된다.
+  const cardRef = useRef<HTMLDivElement>(null)
 
-  // TODO: 카드 영역을 이미지로 캡쳐해 저장 (html2canvas/html-to-image 등). 지금은 완료 토스트만.
-  const handleDownload = () => {
-    onDownload?.()
-    setToastId((id) => id + 1)
-  }
+  // 카드 캡쳐·저장 + 결과 토스트는 공용 훅으로 처리(내 카드 #4와 동일 로직).
+  const { busy, handleDownload, toastElement } = useCardDownload(cardRef, `haru-hana-${date}.png`, onDownload)
 
   return (
     <div className="screen other">
@@ -102,7 +83,8 @@ function OtherAnswer({
           </div>
           {/* 흰색 발광(eclipse): 뒤 카드 상단을 흰 배경으로 자연스럽게 흐리며 타이틀 주변을 밝힌다. */}
           <span className="other__glow" aria-hidden="true" />
-          <CardPreview question={question} answer={answer} date={date} background={background} onLight={onLight} />
+          {/* 앞 카드(타인 답변) — ref로 이 카드만 캡쳐한다. */}
+          <CardPreview ref={cardRef} question={question} answer={answer} date={date} background={background} onLight={onLight} />
         </div>
 
         {/* 내 답변도 노출될 수 있다는 안내 (Figma Frame 51) */}
@@ -114,23 +96,15 @@ function OtherAnswer({
 
         {/* 액션: 타인 카드 다운로드(primary) / 내 카드 보기(텍스트 링크) */}
         <div className="other__actions">
-          <Button onClick={handleDownload}>다른 사람 카드 다운하기</Button>
+          <Button onClick={handleDownload} disabled={busy}>다른 사람 카드 다운하기</Button>
           <button type="button" className="other__link" onClick={onViewMyCard}>
             내 카드 보기
           </button>
         </div>
       </div>
 
-      {/* 다운로드 완료 토스트 — 하단, 체크 아이콘 (#4와 동일) */}
-      {toastId > 0 && (
-        <Toast
-          key={toastId}
-          position="bottom"
-          icon={<CheckCircleIcon />}
-          message="카드가 성공적으로 다운로드 되었어요."
-          onDismiss={() => setToastId(0)}
-        />
-      )}
+      {/* 저장 결과 토스트 — 하단. 성공/실패는 공용 훅이 분기해 렌더 (#4와 동일). */}
+      {toastElement}
     </div>
   )
 }

@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { nextKstMidnight } from '../../lib/date'
-import { captureAndSaveCard } from '../../lib/downloadCard'
+import { useCardDownload } from '../../hooks/useCardDownload'
 import CardPreview from '../../components/CardPreview/CardPreview'
 import Button from '../../components/Button/Button'
 import BackButton from '../../components/BackButton/BackButton'
-import Toast from '../../components/Toast/Toast'
 import './CardResult.css'
 
 interface CardResultProps {
@@ -83,46 +82,13 @@ function useCountdown(deadline: Date, active: boolean): string {
   return formatHms(remaining)
 }
 
-/** 다운로드 완료 토스트의 체크 아이콘 (Figma check-contained 20×20 — 흰 원 + 진한 체크). */
-function CheckCircleIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <circle cx="10" cy="10" r="10" fill="currentColor" />
-      <path
-        d="M5.8 10.4 8.6 13.1 14.2 7.2"
-        stroke="#303030"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-/** 다운로드 실패 토스트의 경고 아이콘 (Figma toast Variant2 20×20 — 둥근 삼각형 + 느낌표 아웃라인, 흰색). */
-function WarningTriangleIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M12 9v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12 17h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
 /**
  * 카드 결과 화면. 완성 카드 + [카드 다운하기 / 다른 사람이 남긴 답변 보기].
  * 같은 컴포넌트가 `completed` bool로 두 상태를 겸한다:
  * - **방금 만든 결과(#4, Figma iPhone 17-9)**: `completed=false`. `onBack`으로 배경 선택 복귀.
  * - **재진입/내 카드보기 완료 화면(Figma "…다시 들어왔을때")**: `completed=true` → 완료 안내 + 카운트다운.
  *   돌아갈 곳이 없어 `onBack` 미전달 시 헤더(뒤로가기)는 숨긴다.
- * "카드 다운하기"는 카드 영역 이미지 캡쳐 방식(추후 구현)이며, 지금은 완료 토스트만 노출한다.
+ * "카드 다운하기"는 카드 영역을 이미지로 캡쳐해 저장한다(useCardDownload 공용 훅 — 타인 카드와 동일).
  */
 function CardResult({
   question = '무인도에 딱 한권의 책만 가져갈수 있다면 어떤 책인가요?',
@@ -139,37 +105,14 @@ function CardResult({
   // 캡쳐 대상 = 실제 카드(.card) 요소. CardPreview → Card로 ref가 전달된다.
   const cardRef = useRef<HTMLDivElement>(null)
 
-  // 저장 결과 토스트. id는 매번 증가시켜 key로 Toast를 remount(애니메이션/타이머 재시작),
-  // variant로 성공/실패 메시지·아이콘을 분기한다. null이면 미노출.
-  const [toast, setToast] = useState<{ id: number; variant: 'success' | 'error' } | null>(null)
-
-  // 캡쳐 진행 중 여부 → 버튼 비활성(중복 클릭 방지).
-  const [busy, setBusy] = useState(false)
+  // 카드 캡쳐·저장 + 결과 토스트는 공용 훅으로 처리(타인 카드 #5와 동일 로직).
+  const { busy, handleDownload, toastElement } = useCardDownload(cardRef, `haru-hana-${date}.png`, onDownload)
 
   // deadline 미지정 시 다음 KST 자정을 한 번만 계산 (매 렌더 새 Date 생성 방지).
   const [fallbackDeadline] = useState(nextKstMidnight)
 
   // completed일 때만 카운트다운을 매초 갱신 (미노출 시 타이머 미가동).
   const remaining = useCountdown(deadline ?? fallbackDeadline, completed)
-
-  // 카드 영역을 PNG로 캡쳐해 저장(모바일 공유 시트 / 데스크톱 다운로드).
-  const handleDownload = async () => {
-    if (busy || !cardRef.current) return
-    setBusy(true)
-    try {
-      const result = await captureAndSaveCard(cardRef.current, `haru-hana-${date}.png`)
-      // 사용자가 공유 시트를 닫은 경우(cancelled)는 토스트를 띄우지 않는다.
-      if (result === 'cancelled') return
-      onDownload?.()
-      setToast((t) => ({ id: (t?.id ?? 0) + 1, variant: 'success' }))
-    } catch (err) {
-      // 캡쳐/공유 실패 원인을 프로덕션에서 추적할 수 있게 남긴다(사용자엔 에러 토스트).
-      console.error('카드 저장 실패:', err)
-      setToast((t) => ({ id: (t?.id ?? 0) + 1, variant: 'error' }))
-    } finally {
-      setBusy(false)
-    }
-  }
 
   return (
     <div className="screen result">
@@ -206,20 +149,8 @@ function CardResult({
         </div>
       </div>
 
-      {/* 저장 결과 토스트 (Figma iPhone 17-10) — 하단. 성공은 체크 아이콘, 실패는 아이콘 없이 안내. */}
-      {toast && (
-        <Toast
-          key={toast.id}
-          position="bottom"
-          icon={toast.variant === 'success' ? <CheckCircleIcon /> : <WarningTriangleIcon />}
-          message={
-            toast.variant === 'success'
-              ? '카드가 성공적으로 다운로드 되었어요.'
-              : '카드를 다운로드 하지 못했어요.'
-          }
-          onDismiss={() => setToast(null)}
-        />
-      )}
+      {/* 저장 결과 토스트 (Figma iPhone 17-10) — 하단. 성공/실패는 공용 훅이 분기해 렌더. */}
+      {toastElement}
     </div>
   )
 }
