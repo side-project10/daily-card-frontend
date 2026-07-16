@@ -90,8 +90,9 @@ function Wizard({ answered, todayText, todayDateKey, todayQuestionId }: WizardPr
 
       {step === 'background' && (
         <BackgroundSelect
-          question={question || undefined}
-          answer={answer || undefined}
+          question={question}
+          answer={answer}
+          date={date}
           onBack={() => setStep('answer')}
           onCreate={async (bgId) => {
             setBackground(bgId)

@@ -10,12 +10,12 @@ import type { BgTab } from './backgrounds'
 import './BackgroundSelect.css'
 
 interface BackgroundSelectProps {
-  /** 카드에 재노출할 오늘의 질문. */
-  question?: string
+  /** 카드에 재노출할 오늘의 질문. (상위가 서버 값으로 채워 전달) */
+  question: string
   /** 카드에 표시할 사용자의 답변. */
-  answer?: string
-  /** 카드 상단 날짜 라벨 (Figma: 2026-12-05). */
-  date?: string
+  answer: string
+  /** 카드 상단 날짜 라벨 (서버 기준 KST dateKey). */
+  date: string
   /** 헤더 "뒤로가기" */
   onBack?: () => void
   /**
@@ -28,12 +28,13 @@ interface BackgroundSelectProps {
 /**
  * 화면 #3 배경 선택 (Figma: iPhone 17 - 19).
  * 카드 프리뷰 + 컬러/그라데이션/이미지 탭 + 배경 스와치 + "카드 만들기".
- * (UI 전용 — 배경 선택/탭 전환은 로컬 상태로만 반영, 저장 로직 없음)
+ * 질문·답변·날짜는 상위(App)가 서버 값으로 채워 전달한다(필수 prop). 배경 선택/탭 전환은
+ * 로컬 상태로만 반영하고, "카드 만들기"는 저장을 onCreate에 위임한 뒤 로딩/실패 안내만 담당한다.
  */
 function BackgroundSelect({
-  question = '무인도에 딱 한권의 책만 가져갈수 있다면 어떤 책인가요?',
-  answer = '‘세이노의 가르침’.\n곱씹을수록 새로운 문장을 발견하게 되는 책.',
-  date = '2026-12-05',
+  question,
+  answer,
+  date,
   onBack,
   onCreate,
 }: BackgroundSelectProps) {
