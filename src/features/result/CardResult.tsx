@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { nextKstMidnight } from '../../lib/date'
+import { captureAndSaveCard } from '../../lib/downloadCard'
 import CardPreview from '../../components/CardPreview/CardPreview'
 import Button from '../../components/Button/Button'
 import BackButton from '../../components/BackButton/BackButton'
@@ -31,8 +32,8 @@ interface CardResultProps {
   /** 헤더 "뒤로가기" */
   onBack?: () => void
   /**
-   * "카드 다운하기" 클릭 시 호출(선택). 실제 저장은 카드 영역을 이미지로 캡쳐하는
-   * 방식으로 추후 구현한다. (지금은 완료 토스트만 노출)
+   * "카드 다운하기" 저장이 성공(공유/다운로드)한 뒤 호출되는 알림 훅(선택).
+   * 실제 캡쳐·저장은 이 컴포넌트가 카드 영역(cardRef)을 이미지로 잡아 직접 수행한다.
    */
   onDownload?: () => void
   /** "다른 사람이 남긴 답변 보기" — 타인 답변(5번)으로 이동. */
@@ -98,6 +99,23 @@ function CheckCircleIcon() {
   )
 }
 
+/** 다운로드 실패 토스트의 경고 아이콘 (Figma toast Variant2 20×20 — 둥근 삼각형 + 느낌표 아웃라인, 흰색). */
+function WarningTriangleIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M12 9v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 17h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 /**
  * 카드 결과 화면. 완성 카드 + [카드 다운하기 / 다른 사람이 남긴 답변 보기].
  * 같은 컴포넌트가 `completed` bool로 두 상태를 겸한다:
@@ -118,8 +136,15 @@ function CardResult({
   onDownload,
   onViewOthers,
 }: CardResultProps) {
-  // 다운로드 시마다 증가 → Toast를 key로 remount 해 애니메이션/타이머를 재시작.
-  const [toastId, setToastId] = useState(0)
+  // 캡쳐 대상 = 실제 카드(.card) 요소. CardPreview → Card로 ref가 전달된다.
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  // 저장 결과 토스트. id는 매번 증가시켜 key로 Toast를 remount(애니메이션/타이머 재시작),
+  // variant로 성공/실패 메시지·아이콘을 분기한다. null이면 미노출.
+  const [toast, setToast] = useState<{ id: number; variant: 'success' | 'error' } | null>(null)
+
+  // 캡쳐 진행 중 여부 → 버튼 비활성(중복 클릭 방지).
+  const [busy, setBusy] = useState(false)
 
   // deadline 미지정 시 다음 KST 자정을 한 번만 계산 (매 렌더 새 Date 생성 방지).
   const [fallbackDeadline] = useState(nextKstMidnight)
@@ -127,10 +152,23 @@ function CardResult({
   // completed일 때만 카운트다운을 매초 갱신 (미노출 시 타이머 미가동).
   const remaining = useCountdown(deadline ?? fallbackDeadline, completed)
 
-  // TODO: 카드 영역을 이미지로 캡쳐해 저장 (html2canvas/html-to-image 등). 지금은 완료 토스트만.
-  const handleDownload = () => {
-    onDownload?.()
-    setToastId((id) => id + 1)
+  // 카드 영역을 PNG로 캡쳐해 저장(모바일 공유 시트 / 데스크톱 다운로드).
+  const handleDownload = async () => {
+    if (busy || !cardRef.current) return
+    setBusy(true)
+    try {
+      const result = await captureAndSaveCard(cardRef.current, `daily-card-${date}.png`)
+      // 사용자가 공유 시트를 닫은 경우(cancelled)는 토스트를 띄우지 않는다.
+      if (result === 'cancelled') return
+      onDownload?.()
+      setToast((t) => ({ id: (t?.id ?? 0) + 1, variant: 'success' }))
+    } catch (err) {
+      // 캡쳐/공유 실패 원인을 프로덕션에서 추적할 수 있게 남긴다(사용자엔 에러 토스트).
+      console.error('카드 저장 실패:', err)
+      setToast((t) => ({ id: (t?.id ?? 0) + 1, variant: 'error' }))
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -139,13 +177,13 @@ function CardResult({
       {onBack && <BackButton onClick={onBack} />}
 
       <div className="result__content">
-        {/* 완성 카드 — 배경 선택 결과 반영 (#3/#4/#5 공용 프리뷰) */}
-        <CardPreview question={question} answer={answer} date={date} background={background} onLight={onLight} />
+        {/* 완성 카드 — 배경 선택 결과 반영 (#3/#4/#5 공용 프리뷰). ref로 이 카드만 캡쳐한다. */}
+        <CardPreview ref={cardRef} question={question} answer={answer} date={date} background={background} onLight={onLight} />
 
         <div className="result__footer">
           {/* 액션: 다운로드(primary) / 타인 답변(secondary) — Figma Frame 3 */}
           <div className="result__actions">
-            <Button onClick={handleDownload}>카드 다운하기</Button>
+            <Button onClick={handleDownload} disabled={busy}>카드 다운하기</Button>
             <Button variant="secondary" onClick={onViewOthers}>
               다른 사람이 남긴 답변 보기
             </Button>
@@ -168,14 +206,18 @@ function CardResult({
         </div>
       </div>
 
-      {/* 다운로드 완료 토스트 (Figma iPhone 17-10) — 하단, 체크 아이콘 */}
-      {toastId > 0 && (
+      {/* 저장 결과 토스트 (Figma iPhone 17-10) — 하단. 성공은 체크 아이콘, 실패는 아이콘 없이 안내. */}
+      {toast && (
         <Toast
-          key={toastId}
+          key={toast.id}
           position="bottom"
-          icon={<CheckCircleIcon />}
-          message="카드가 성공적으로 다운로드 되었어요."
-          onDismiss={() => setToastId(0)}
+          icon={toast.variant === 'success' ? <CheckCircleIcon /> : <WarningTriangleIcon />}
+          message={
+            toast.variant === 'success'
+              ? '카드가 성공적으로 다운로드 되었어요.'
+              : '카드를 다운로드 하지 못했어요.'
+          }
+          onDismiss={() => setToast(null)}
         />
       )}
     </div>

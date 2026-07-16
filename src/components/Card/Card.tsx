@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref } from 'react'
 import './Card.css'
 
 interface CardProps {
@@ -11,15 +11,17 @@ interface CardProps {
   children?: ReactNode
   /** `.card`에 추가할 클래스 (테마/명암 모디파이어 등). */
   className?: string
+  /** `.card` 요소 ref (결과 화면에서 카드 영역만 이미지로 캡쳐할 때 사용). React 19 ref-as-prop. */
+  ref?: Ref<HTMLDivElement>
 }
 
 /**
  * 정사각 카드 프리뷰 (Figma 29:1587 — 319x319, radius 20).
  * 배경 위에 이미지 또는 콘텐츠를 얹은 형태로, 배경 선택(3번)·결과(4번)에서도 재사용.
  */
-function Card({ background = '#FFECEC', image, imageAlt = '', children, className }: CardProps) {
+function Card({ background = '#FFECEC', image, imageAlt = '', children, className, ref }: CardProps) {
   return (
-    <div className={`card${className ? ` ${className}` : ''}`} style={{ background }}>
+    <div ref={ref} className={`card${className ? ` ${className}` : ''}`} style={{ background }}>
       {image && <img className="card__graphic" src={image} alt={imageAlt} aria-hidden={!imageAlt} />}
       {children && <div className="card__content">{children}</div>}
     </div>
